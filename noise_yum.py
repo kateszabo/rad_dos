@@ -21,10 +21,12 @@ def convert_to_si(databox):
 
 def load_files():
     # Load files
+    print("Select signal files")
     sig_paths = sm.dialogs.load_multiple()
     sig_data = sm.data.load_multiple(sig_paths)
     signals = [convert_to_si(file) for file in sig_data]
 
+    print("Select detector files")
     det_paths = sm.dialogs.load_multiple()
     det_data = sm.data.load_multiple(det_paths)
     detector = [convert_to_si(file) for file in det_data]
@@ -56,3 +58,27 @@ def compute_psds(signals, detector, channels):
     return f_sig, avg_psd_sig, f_det, avg_psd_det
 
 
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
+    signals, detector, folder_name = load_files()
+
+    channels = [1, 2, 3] 
+    channel_names = {1: 'SigDC', 2: 'SigAC', 3: 'LinOut'}
+    f_sig, avg_psd_sig, f_det, avg_psd_det = compute_psds(signals, detector, channels)
+
+    # plot each channel (signal and detector)
+    fig, ax = plt.subplots(1, len(channels), sharey=True)
+
+    for i, channel in enumerate(channels):
+        ax[i].loglog(f_sig[i], avg_psd_sig[i], label="Signal")
+        ax[i].loglog(f_det[i], avg_psd_det[i], label="Detector")
+        ax[i].loglog()
+        ax[i].set_title(channel_names[channel])
+        ax[i].set_xlabel("Frequency (Hz)")
+        
+    fig.suptitle(f"PSDs for {folder_name}")
+    ax[0].set_ylabel(r'PSD ($\frac{V}{\sqrt{Hz}}$)')
+    ax[-1].legend()
+
+    plt.show()
