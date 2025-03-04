@@ -25,11 +25,13 @@ def load_files():
     sig_paths = sm.dialogs.load_multiple()
     sig_data = sm.data.load_multiple(sig_paths)
     signals = [convert_to_si(file) for file in sig_data]
+    print(f"Each signal file contains {len(signals[0][0])} timesteps")
 
     print("Select detector files")
     det_paths = sm.dialogs.load_multiple()
     det_data = sm.data.load_multiple(det_paths)
     detector = [convert_to_si(file) for file in det_data]
+    print(f"Each detector file contains {len(detector[0][0])} timesteps")
 
     folder_name = sig_paths[0].split('/') [-2] # named based on first file in signal data
 
@@ -45,6 +47,9 @@ def average_psd(databox_list, col):
     return f, avg_psd
 
 def compute_psds(signals, detector, channels):
+    """Calculates PSDs for signal and detector data, and coarsens."""
+    coarsen_level = 1.01
+
     f_sig = [None] * len(channels)
     avg_psd_sig = [None] * len(channels)
 
@@ -53,9 +58,37 @@ def compute_psds(signals, detector, channels):
 
     for i, channel in enumerate(channels): 
         f_sig[i], avg_psd_sig[i] = average_psd(signals, channel)
+        f_sig[i], avg_psd_sig[i] = sm.fun.coarsen_data(f_sig[i], avg_psd_sig[i], level=coarsen_level, exponential=True)
+
         f_det[i], avg_psd_det[i] = average_psd(detector, channel)
+        f_det[i], avg_psd_det[i] = sm.fun.coarsen_data(f_det[i], avg_psd_det[i], level=coarsen_level, exponential=True)
 
     return f_sig, avg_psd_sig, f_det, avg_psd_det
+
+def compute_mean_power(signal, eta, gain):
+    """signal: 2d array signal[acquisiton file][timestamp]"""
+
+    # compute mean statistical values across all acquisition files
+    mean = np.mean(np.mean(signal, axis=1))
+    std = np.mean(np.std(signal, axis=1))
+    rms = np.mean(np.sqrt(np.mean(signal ** 2, axis=0)))
+
+    print(f"Mean {mean:.2f} V")
+    print(f"Standard deviation {std:.2f} V")
+    print(f"RMS {rms:.2f} V")
+
+    pwr = mean / (eta * gain)  # V to W
+    print(f"Average power {pwr:.4f} W")
+
+    return mean, pwr
+
+
+def compute_rin(signal_psd, mean_signal, detector_psd):
+    """ 
+    signal: averaged PSD as array
+    detector: averaged PSD as array"""
+    rin = (signal_psd - detector_psd) / mean_signal ** 2
+    return rin
 
 
 if __name__ == '__main__':
