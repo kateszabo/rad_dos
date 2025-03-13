@@ -79,15 +79,6 @@ def compute_rin(signal_psd, mean_signal, detector_psd):
     rin = np.abs((signal_psd - detector_psd) / mean_signal ** 2)
     return rin
 
-def do_everything(channels: pd.DataFrame):
-    # get detector files and PSDs
-    detector, detector_filename = load_files("detector")
-    f_det, avg_psd_det = compute_psds(detector, channels['column_index'])
-
-    # get signal files and PSDs
-    signals, signal_filename = load_files("signal")
-    f_sig, avg_psd_sig = compute_psds(signals, detector, channels)
-
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
