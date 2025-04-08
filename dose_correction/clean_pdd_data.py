@@ -1,15 +1,8 @@
-# %% Import libraries
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
 
-targ_depth = 2 # cm
-field_size = 3 # cm
-ssd = 75 # cm
-
-# %% Import data from csv
-
+# %% import data
 data610 = pd.read_csv('6_10_Narayanasamy.csv', skiprows=1, header=0)
 # data15 = pd.read_csv('15_Pogorski.csv', skiprows=1, header=0)
 data15 = pd.read_csv('15 MV.csv', names=['X', 'Y'])
@@ -49,20 +42,21 @@ plt.title('PDD curves')
 plt.legend()
 
 # %% Interpolate
+depth = np.linspace(0, 4, 100)  # cm
 
-percent_6mv = np.interp(targ_depth, pdd_6mv['X'], pdd_6mv['Y'])
-print(f'6 MV at {targ_depth} cm is {percent_6mv * 100 :.0f} %')
-percent_6fff = np.interp(targ_depth, pdd_6fff['X'], pdd_6fff['Y'])
-print(f'6 FFF at {targ_depth} cm is {percent_6fff * 100:.0f} %')
-percent_10mv = np.interp(targ_depth, pdd_10mv['X'], pdd_10mv['Y'])
-print(f'10 MV at {targ_depth} cm is {percent_10mv * 100:.0f} %')
-percent_10fff = np.interp(targ_depth, pdd_10fff['X'], pdd_10fff['Y'])
-print(f'10 FFF at {targ_depth} cm is {percent_10fff * 100:.0f} %')
+percent_6mv = np.interp(depth, pdd_6mv['X'], pdd_6mv['Y'])
+percent_6fff = np.interp(depth, pdd_6fff['X'], pdd_6fff['Y'])
+percent_10mv = np.interp(depth, pdd_10mv['X'], pdd_10mv['Y'])
+percent_10fff = np.interp(depth, pdd_10fff['X'], pdd_10fff['Y'])
+percent_15mv = np.interp(depth, pdd_15mv['X'], pdd_15mv['Y'])
 
-percent_15mv = np.interp(targ_depth, pdd_15mv['X'], pdd_15mv['Y'])
-print(f'15 MV at {targ_depth} cm is {percent_15mv * 100:.0f} %')
+pdd_data = pd.DataFrame({
+    'Depth': depth,
+    '6X': percent_6mv,
+    '6fff': percent_6fff,
+    '10X': percent_10mv,
+    '10fff': percent_10fff,
+    '15X': percent_15mv
+})
 
-# %% Field size correction
-rdf_6mv = np.array([])
-
-# %% SSD correction
+pdd_data.to_csv('pdd_data.csv', index=False)
