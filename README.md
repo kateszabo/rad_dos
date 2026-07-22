@@ -8,5 +8,5 @@ Setting up a "global" virtual environment using venv
 Accessing SpinMob
 1. Create a new folder (suggested name: "site-packages") in a high-level directory in the computer: ex. "C:\sankeylab_python\site-packages"
 2. Clone spinmob into the site-packages folder.
-3. In the virtual environment .venv/Lib folder, add a .pth file called "SANKEYLAB.pth"
+3. In the virtual environment .venv/Lib/site-packages folder, add a .pth file called "SANKEYLAB.pth"
 4. In the SANKEYLAB.pth file, type the path to the site-packages folder and save the file.
